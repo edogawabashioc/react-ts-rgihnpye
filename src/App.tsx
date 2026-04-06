@@ -2090,11 +2090,11 @@ export default function App() {
           const [icon, msg] = [...msgs].reverse().find(([d])=>streak.count>=d) || ["💊","今日から始めよう！"];
           const streakText = `🔥 PERFORMER'S TIME で${streak.count}日連続サプリ達成！
 「身体が資本」をガチで管理中💊
-https://react-ts-rgihnpye.stackblitz.io
+https://performers-time.netlify.app
 #PERFORMERSTIME #パフォーマー`;
           const appText = `💊 パフォーマー向けサプリ管理アプリ「PERFORMER'S TIME」
 医学的タイミングで今日飲むサプリがわかる！
-https://react-ts-rgihnpye.stackblitz.io
+https://performers-time.netlify.app
 #PERFORMERSTIME #舞台 #パフォーマー`;
           const doShare = (text) => {
             if(navigator.share){
