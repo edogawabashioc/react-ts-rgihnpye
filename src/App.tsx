@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+  }
+}
+
 /* ═══════════════════════════════════════════════
    医学的タイミング根拠
    CoQ10・VitD・ルテイン : 脂溶性→朝食後30-40分（脂質で吸収3-4倍）
@@ -999,7 +1006,9 @@ function calcMacros(weight, dayMode, height="165", age="30", gender="female", jo
   const fat  = Math.round(kcal * 0.25 / 9);
   const carb = Math.round((kcal - prot*4 - fat*9) / 4);
 
-  return {prot, carb, fat, kcal, bmr, actMult};
+  const baseKcal = kcal;
+  const extraKcal = 0;
+  return {prot, carb, fat, kcal, bmr, actMult, baseKcal, extraKcal};
 }
 
 const FOOD_DB = {
@@ -1133,7 +1142,7 @@ const STORE_FOODS = {
 
 
 /* ─── ドラムロール時間ピッカーコンポーネント ─── */
-function TimePicker({ value, onChange, label, disabled }) {
+function TimePicker({ value, onChange, label, disabled=false }) {
   const [open, setOpen] = React.useState(false);
   const [h, setH] = React.useState(() => parseInt((value||"00:00").split(":")[0]));
   const [m, setM] = React.useState(() => Math.floor(parseInt((value||"00:00").split(":")[1]||0)/5)*5);
@@ -1621,7 +1630,7 @@ export default function App() {
     s1.src = "https://www.googletagmanager.com/gtag/js?id=G-SRB8BP5YSL";
     document.head.appendChild(s1);
     window.dataLayer = window.dataLayer || [];
-    function gtag(){window.dataLayer.push(arguments);}
+    function gtag(...args: any[]){window.dataLayer.push(args);}
     window.gtag = gtag;
     gtag("js", new Date());
     gtag("config", "G-SRB8BP5YSL");
@@ -1702,6 +1711,8 @@ export default function App() {
   const isVideo = jobType==="video";
   const isMusic = jobType==="music";
   const isWing  = wingMode;
+  const isFull  = careLevel==="full" || careLevel==="wing";
+  const essIds  = getEssentialIds(jobType, dayMode);
   const filterPills = (pills) => (isFull||isWing) ? pills : pills.filter(p => essIds.includes(p.id));
 
   const generate = () => {
@@ -2007,14 +2018,14 @@ export default function App() {
                   };
                   return(
                   <div className="dose-badge-wrap">
-                    {Object.entries(dmap).map(([id,{label,cls,hidden}])=>
+                    {Object.entries(dmap).map(([id,entry])=>{const {label,cls,hidden=false}=entry as {label:string,cls:string,hidden?:boolean}; return(
                       s(id)&&!hidden&&<span key={id} className={`dose-badge ${cls}`}
                         style={cls==="teal-dose"?{background:"rgba(58,144,144,.1)",borderColor:"rgba(58,144,144,.3)",color:"#60c0c0"}:
                                cls==="orange-dose"?{background:"rgba(192,112,64,.1)",borderColor:"rgba(192,112,64,.25)",color:"#d08060"}:
                                cls==="music-dose"?{background:"rgba(128,96,192,.1)",borderColor:"rgba(128,96,192,.25)",color:"#b090e0"}:{}}>
                         {label}
                       </span>
-                    )}
+                    );})}
                     {wingMode&&<>
                       <span className="dose-badge" style={{background:"rgba(180,100,20,.1)",borderColor:"rgba(200,140,20,.35)",color:"#d4890a"}}>☕ カフェイン 80mg（コーヒー1杯）</span>
                       <span className="dose-badge" style={{background:"rgba(180,100,20,.1)",borderColor:"rgba(200,140,20,.35)",color:"#d4890a"}}>💊 栄養ドリンク 50mg〜</span>
@@ -2396,7 +2407,7 @@ https://react-ts-rgihnpye.stackblitz.io
                             <div>
                               <div style={{fontSize:11,fontWeight:700,
                                 color:"#d4890a",
-                                fontFamily:"'Noto Sans JP',sans-serif",fontWeight:700
+                                fontFamily:"'Noto Sans JP',sans-serif"
                               }}>{item.drinkInfo.name}</div>
                               <div style={{fontSize:10,
                                 color:"rgba(180,110,20,.8)"
@@ -2497,12 +2508,11 @@ https://react-ts-rgihnpye.stackblitz.io
             mg:"日本人食事摂取基準：男性4.5mg/kg、女性3.5mg/kg",
             coq:"体重×2mg（基礎）。本番日は産生需要が1.5倍に増加",
             coqB:"L-カルニチンと協働する追加分", lc:"輸送タンパク量は体重に比例",
-            lut:"眼科的有効量10-20mg/日", lte:"α波誘導の有効量100-200mg",
+            lut:"眼科的有効量10-20mg/日", lte:"α波誘導で緊張を抑えながら集中力を維持。演奏30〜60分前に摂取",
             iron:"月経のある女性は損失補填で男性の1.8倍必要",
             b6:"神経伝達物質の合成に必須。末梢神経の健康を支え指・腕の精度に直結",
             om3:"EPA/DHAを含むオメガ3系脂肪酸。継続的な摂取がおすすめ",
             mgx:"演奏による筋持続収縮でMgが消耗→不足で痙攣・ジストニアリスク上昇",
-            lte:"α波誘導で緊張を抑えながら集中力を維持。演奏30〜60分前に摂取",
           };
           return(
           <div className="page">
@@ -2558,7 +2568,7 @@ https://react-ts-rgihnpye.stackblitz.io
               const fullItems = [];
               const essItems  = [];
 
-              [...activeIds].forEach(id => {
+              Array.from(activeIds as Set<string>).forEach(id => {
                 const p = P[id];
                 if(!p || !p.wakaFlag || !p.waka) return;
                 // VitC系は1つにまとめる
