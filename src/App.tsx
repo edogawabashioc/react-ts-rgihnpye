@@ -1575,7 +1575,7 @@ function SimpleModeView({ jobType, setJobType, dayMode, setDayMode, lightMode })
           ))}
         </div>
         <div style={{fontSize:9,color:"var(--dim)",marginTop:6,paddingLeft:4,lineHeight:1.7}}>
-          💡 詳しいコンビニ飯レシピは<span style={{color:goldL,fontWeight:700}}>廃人モード → コンビニ飯タブ</span>で
+          💡 詳しいコンビニ飯レシピは<span style={{color:goldL,fontWeight:700}}>プロ仕様 → コンビニ飯タブ</span>で
         </div>
       </div>
 
@@ -1604,7 +1604,7 @@ function SimpleModeView({ jobType, setJobType, dayMode, setDayMode, lightMode })
           ))}
         </div>
         <div style={{fontSize:9,color:"var(--dim)",marginTop:6,paddingLeft:4,lineHeight:1.7}}>
-          💡 翌日の起床推奨時刻は<span style={{color:goldL,fontWeight:700}}>廃人モード → タイムライン</span>で自動計算
+          💡 翌日の起床推奨時刻は<span style={{color:goldL,fontWeight:700}}>プロ仕様 → タイムライン</span>で自動計算
         </div>
       </div>
 
@@ -1627,7 +1627,7 @@ export default function App() {
     gtag("config", "G-SRB8BP5YSL");
   }, []);
 
-  const [simpleMode, setSimpleMode] = useState(true); // true=ざっくり false=廃人
+  const [simpleMode, setSimpleMode] = useState(true); // true=ざっくり false=プロ仕様
   const [jobType,   setJobType]  = useState("stage");
   const [dayMode,   setDayMode]  = useState("cond");
   const [nightMode, setNightMode]= useState(false);
@@ -1823,7 +1823,7 @@ export default function App() {
           />
         )}
 
-        {/* ── 廃人モード ── */}
+        {/* ── プロ仕様 ── */}
         <div style={{display:simpleMode?"none":"block"}}>
         {/* 仕事タイプ */}
         <div className="job-wrap">
@@ -3121,7 +3121,7 @@ https://react-ts-rgihnpye.stackblitz.io
           </div>
         )}
 
-        </div>{/* /廃人モード */}
+        </div>{/* /プロ仕様 */}
 
         {/* フッタークレジット */}
         {/* ── 免責・広告表示 ── */}
