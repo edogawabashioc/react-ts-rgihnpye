@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-declare global {
-  interface Window {
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
-  }
-}
-
 /* ═══════════════════════════════════════════════
    医学的タイミング根拠
    CoQ10・VitD・ルテイン : 脂溶性→朝食後30-40分（脂質で吸収3-4倍）
@@ -128,7 +121,7 @@ body{background:#0a0a0f;color:#f0ead6;font-family:'Noto Sans JP',sans-serif;min-
 .light-mode .tip-box,.light-mode .buy-section{background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.06)}
 /* light mode theme toggle */
 .theme-toggle{position:fixed;top:12px;right:16px;z-index:999;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg2)}
+.app{width:100%;min-height:100vh;background:var(--bg2)}
 .curtain{width:100%;height:5px;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d))}
 
 /* HEADER */
@@ -1006,9 +999,7 @@ function calcMacros(weight, dayMode, height="165", age="30", gender="female", jo
   const fat  = Math.round(kcal * 0.25 / 9);
   const carb = Math.round((kcal - prot*4 - fat*9) / 4);
 
-  const baseKcal = kcal;
-  const extraKcal = 0;
-  return {prot, carb, fat, kcal, bmr, actMult, baseKcal, extraKcal};
+  return {prot, carb, fat, kcal, bmr, actMult};
 }
 
 const FOOD_DB = {
@@ -1140,34 +1131,9 @@ const STORE_FOODS = {
   },
 };
 
-/* ─── がっつり食べたい時のデータ ─── */
-const HEARTY_DB = {
-  breakfast:[
-    {label:"A",emoji:"🍙🍙🥚",name:"おにぎり2個＋ゆで卵2個＋牛乳",ex:"炭水化物とタンパク質をしっかり確保。稽古・本番前でも腹持ちが良い",p:26,c:72,f:13,kcal:510,tip:"牛乳でカルシウムも補給。脂溶性サプリの吸収をサポート"},
-    {label:"B",emoji:"🍞🥚🧀",name:"サンドイッチ2個＋ゆで卵＋牛乳",ex:"ボリュームのある朝食。タンパク質と炭水化物をバランスよく",p:28,c:60,f:20,kcal:530,tip:"卵とチーズで良質な脂質も確保。午前中の集中力を支える"},
-    {label:"C",emoji:"🍗🍙🥛",name:"チキン系惣菜パン＋おにぎり1個＋豆乳",ex:"ボリューム感があり食べ応え◎。移動中でも食べやすい",p:30,c:68,f:18,kcal:555,tip:"豆乳の大豆タンパクで筋修復をサポート。脂溶性サプリとの相性も良い"},
-    {label:"D",emoji:"🍜🍙🥚",name:"カップ麺（普通サイズ）＋おにぎり1個＋ゆで卵",ex:"食欲がある朝のガッツリパターン",p:24,c:78,f:12,kcal:520,tip:"カップ麺は塩分が多いので水分も一緒に。スープは全部飲まなくてOK"},
-    {label:"E",emoji:"🥐🧀🥛",name:"クロワッサン2個＋チーズ＋カフェラテ",ex:"脂質高めでエネルギーが長続き。午前稽古前の高カロリー朝食",p:18,c:55,f:28,kcal:540,tip:"クロワッサンの脂質がCoQ10・VitDの吸収を大幅UP。稽古前向き"},
-  ],
-  lunch:[
-    {label:"A",emoji:"🍗🍙🍙",name:"から揚げ（5個）＋おにぎり2個＋野菜スープ",ex:"高タンパク・高炭水化物でエネルギーを最大補充",p:35,c:90,f:24,kcal:720,tip:"から揚げのタンパク質で筋修復を促進。マチソワ間の補給に最適"},
-    {label:"B",emoji:"🍱🍙",name:"幕の内弁当（大）＋おにぎり1個",ex:"おかずとご飯がしっかり揃う完全食。マチソワの合間にガッツリ補給",p:30,c:120,f:22,kcal:800,tip:"量が多いので食べ終わりから本番まで2時間は確保したい"},
-    {label:"C",emoji:"🥩🍚",name:"焼肉弁当＋味噌汁＋バナナ",ex:"高タンパク＋炭水化物で回復と次への備えを両立",p:32,c:95,f:28,kcal:760,tip:"バナナでカリウム補給。疲労した筋肉のケアにもなる"},
-    {label:"D",emoji:"🍜🍙🥚",name:"肉うどん（大）＋おにぎり2個＋ゆで卵",ex:"消化がよく量もしっかり。本番間の食事に適した組み合わせ",p:28,c:105,f:14,kcal:670,tip:"うどんは消化吸収が速い。スープで電解質も補給できる"},
-    {label:"E",emoji:"🍛🍙",name:"カレーライス（大盛り）＋サラダチキン",ex:"スパイスで代謝活性化＋高タンパクの最強コンビ",p:36,c:115,f:20,kcal:790,tip:"カレーのスパイスが代謝を活性化。稽古日・公演後の昼向き"},
-  ],
-  recovery:[
-    {label:"A",emoji:"🍗🍙🍙🥛",name:"サラダチキン＋おにぎり2個＋牛乳",ex:"終演後のタンパク質＋炭水化物補給の王道ガッツリ版",p:36,c:72,f:8,kcal:500,tip:"牛乳のカゼインが就寝中の筋修復を持続的にサポート"},
-    {label:"B",emoji:"🍜🍗",name:"温かいスープパスタ＋サラダチキン",ex:"炭水化物とタンパク質を温かく補給。体の芯から回復",p:30,c:65,f:10,kcal:475,tip:"温かい食事で副交感神経をONに。パスタでグリコーゲンを補充"},
-    {label:"C",emoji:"🥩🍚🍜",name:"焼き鳥（4本）＋おにぎり2個＋具だくさん味噌汁",ex:"タンパク質と炭水化物をバランスよくガッツリ補給",p:34,c:68,f:12,kcal:510,tip:"焼き鳥は脂質が少なく消化が良い。疲れた夜でも食べやすい"},
-    {label:"D",emoji:"🐟🍚",name:"鮭おにぎり2個＋豚汁＋ゆで卵",ex:"DHA＋良質タンパク＋炭水化物のトリプル補給",p:28,c:80,f:14,kcal:560,tip:"鮭のDHA・EPAが炎症を抑え、翌日のコンディションを底上げ"},
-    {label:"E",emoji:"🫙🍌🍙",name:"ギリシャヨーグルト（大）＋バナナ＋おにぎり2個",ex:"カゼイン＋カリウム＋炭水化物の夜の完全回復セット",p:26,c:88,f:5,kcal:500,tip:"就寝前の高タンパク補給で翌日の疲労感が大きく変わる"},
-  ],
-};
-
 
 /* ─── ドラムロール時間ピッカーコンポーネント ─── */
-function TimePicker({ value, onChange, label, disabled=false }) {
+function TimePicker({ value, onChange, label, disabled }) {
   const [open, setOpen] = React.useState(false);
   const [h, setH] = React.useState(() => parseInt((value||"00:00").split(":")[0]));
   const [m, setM] = React.useState(() => Math.floor(parseInt((value||"00:00").split(":")[1]||0)/5)*5);
@@ -1655,7 +1621,7 @@ export default function App() {
     s1.src = "https://www.googletagmanager.com/gtag/js?id=G-SRB8BP5YSL";
     document.head.appendChild(s1);
     window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]){window.dataLayer.push(args);}
+    function gtag(){window.dataLayer.push(arguments);}
     window.gtag = gtag;
     gtag("js", new Date());
     gtag("config", "G-SRB8BP5YSL");
@@ -1723,22 +1689,19 @@ export default function App() {
   const [showHomeBanner, setShowHomeBanner] = useState(()=>{
     try{return localStorage.getItem("pt_homeBanner")!=="dismissed"}catch{return true}
   });
-  const [lunchOn,    setLunchOn]   = useState(true);
-  const [heartyMode, setHeartyMode] = useState(false);
+  const [lunchOn,   setLunchOn]  = useState(true);
   // マチソワ（2公演）の時は自動でお弁当ON
   React.useEffect(()=>{
     const activeCount = shows.filter(s=>s.enabled&&s.time).length;
     if(activeCount >= 2) setLunchOn(true);
   }, [shows]);
   const [store,     setStore]     = useState("seven"); // seven / famima / lawson
-  const [mealIdx,   setMealIdx]  = useState({breakfast:0,lunch:0,preboost:0,recovery:0});
+  const [mealIdx,   setMealIdx]  = useState({breakfast:0,lunch:0,preboost:0,recovery:0}); // male/female
 
   const isBoost = dayMode==="boost"||dayMode==="both";
   const isVideo = jobType==="video";
   const isMusic = jobType==="music";
   const isWing  = wingMode;
-  const isFull  = careLevel==="full" || careLevel==="wing";
-  const essIds  = getEssentialIds(jobType, dayMode);
   const filterPills = (pills) => (isFull||isWing) ? pills : pills.filter(p => essIds.includes(p.id));
 
   const generate = () => {
@@ -2044,14 +2007,14 @@ export default function App() {
                   };
                   return(
                   <div className="dose-badge-wrap">
-                    {Object.entries(dmap).map(([id,entry])=>{const {label,cls,hidden=false}=entry as {label:string,cls:string,hidden?:boolean}; return(
+                    {Object.entries(dmap).map(([id,{label,cls,hidden}])=>
                       s(id)&&!hidden&&<span key={id} className={`dose-badge ${cls}`}
                         style={cls==="teal-dose"?{background:"rgba(58,144,144,.1)",borderColor:"rgba(58,144,144,.3)",color:"#60c0c0"}:
                                cls==="orange-dose"?{background:"rgba(192,112,64,.1)",borderColor:"rgba(192,112,64,.25)",color:"#d08060"}:
                                cls==="music-dose"?{background:"rgba(128,96,192,.1)",borderColor:"rgba(128,96,192,.25)",color:"#b090e0"}:{}}>
                         {label}
                       </span>
-                    );})}
+                    )}
                     {wingMode&&<>
                       <span className="dose-badge" style={{background:"rgba(180,100,20,.1)",borderColor:"rgba(200,140,20,.35)",color:"#d4890a"}}>☕ カフェイン 80mg（コーヒー1杯）</span>
                       <span className="dose-badge" style={{background:"rgba(180,100,20,.1)",borderColor:"rgba(200,140,20,.35)",color:"#d4890a"}}>💊 栄養ドリンク 50mg〜</span>
@@ -2116,11 +2079,11 @@ export default function App() {
           const [icon, msg] = [...msgs].reverse().find(([d])=>streak.count>=d) || ["💊","今日から始めよう！"];
           const streakText = `🔥 PERFORMER'S TIME で${streak.count}日連続サプリ達成！
 「身体が資本」をガチで管理中💊
-https://performers-time.netlify.app
+https://react-ts-rgihnpye.stackblitz.io
 #PERFORMERSTIME #パフォーマー`;
           const appText = `💊 パフォーマー向けサプリ管理アプリ「PERFORMER'S TIME」
 医学的タイミングで今日飲むサプリがわかる！
-https://performers-time.netlify.app
+https://react-ts-rgihnpye.stackblitz.io
 #PERFORMERSTIME #舞台 #パフォーマー`;
           const doShare = (text) => {
             if(navigator.share){
@@ -2433,7 +2396,7 @@ https://performers-time.netlify.app
                             <div>
                               <div style={{fontSize:11,fontWeight:700,
                                 color:"#d4890a",
-                                fontFamily:"'Noto Sans JP',sans-serif"
+                                fontFamily:"'Noto Sans JP',sans-serif",fontWeight:700
                               }}>{item.drinkInfo.name}</div>
                               <div style={{fontSize:10,
                                 color:"rgba(180,110,20,.8)"
@@ -2534,11 +2497,12 @@ https://performers-time.netlify.app
             mg:"日本人食事摂取基準：男性4.5mg/kg、女性3.5mg/kg",
             coq:"体重×2mg（基礎）。本番日は産生需要が1.5倍に増加",
             coqB:"L-カルニチンと協働する追加分", lc:"輸送タンパク量は体重に比例",
-            lut:"眼科的有効量10-20mg/日", lte:"α波誘導で緊張を抑えながら集中力を維持。演奏30〜60分前に摂取",
+            lut:"眼科的有効量10-20mg/日", lte:"α波誘導の有効量100-200mg",
             iron:"月経のある女性は損失補填で男性の1.8倍必要",
             b6:"神経伝達物質の合成に必須。末梢神経の健康を支え指・腕の精度に直結",
             om3:"EPA/DHAを含むオメガ3系脂肪酸。継続的な摂取がおすすめ",
             mgx:"演奏による筋持続収縮でMgが消耗→不足で痙攣・ジストニアリスク上昇",
+            lte:"α波誘導で緊張を抑えながら集中力を維持。演奏30〜60分前に摂取",
           };
           return(
           <div className="page">
@@ -2594,7 +2558,7 @@ https://performers-time.netlify.app
               const fullItems = [];
               const essItems  = [];
 
-              Array.from(activeIds as Set<string>).forEach(id => {
+              [...activeIds].forEach(id => {
                 const p = P[id];
                 if(!p || !p.wakaFlag || !p.waka) return;
                 // VitC系は1つにまとめる
@@ -2748,7 +2712,7 @@ https://performers-time.netlify.app
             id:"f_breakfast", mkey:"breakfast", time:fBreakfast,
             label:"朝食", dot:"am",
             reason:`起床後30分が目安。この後サプリ①（脂溶性）を35分後、サプリ②を15分後に摂取。`,
-            db: heartyMode ? HEARTY_DB.breakfast : SF.breakfast,
+            db: SF.breakfast,
           });
 
           // 公演がある場合
@@ -2762,8 +2726,8 @@ https://performers-time.netlify.app
                   id:"f_lunch", mkey:"lunch", time:lunchTime,
                   label:"お昼", dot:"pm",
                   reason:`開演${firstShow.time}の3時間30分前。消化を終わらせるための食べ終わりタイミング`,
-                  db: heartyMode ? HEARTY_DB.lunch : lunchOn ? FOOD_DB.lunchBento : SF.lunchCombini,
-                  isBento: !heartyMode && lunchOn,
+                  db: lunchOn ? FOOD_DB.lunchBento : SF.lunchCombini,
+                  isBento: lunchOn,
                 });
               }
             }
@@ -2796,8 +2760,8 @@ https://performers-time.netlify.app
                   id:`f_inter${i}`, mkey:"lunch", time:interMealTime,
                   label:`🍱 マチネ終演後・お弁当`, dot:"post",
                   reason:`マチネ終演（${matEndTime}）の20分後。次の${isMusic?"ライブ":isVideo?"撮影":"公演"}（${nextShow.time}）まで${Math.floor(minutesUntilNext/60)}時間${minutesUntilNext%60>0?minutesUntilNext%60+"分":""}。しっかり食べてソワレに備える。`,
-                  db: heartyMode ? HEARTY_DB.lunch : FOOD_DB.lunchBento,
-                  isBento: !heartyMode,
+                  db: FOOD_DB.lunchBento,
+                  isBento: true,
                 });
               }
             });
@@ -2808,7 +2772,7 @@ https://performers-time.netlify.app
               id:"f_recovery", mkey:"recovery", time:recovTime,
               label:"終演後・回復食", dot:"post",
               reason:`終演後60分以内が筋修復のゴールデンタイム。タンパク質を優先`,
-              db: heartyMode ? HEARTY_DB.recovery : SF.recovery,
+              db: SF.recovery,
             });
           } else {
             // 公演なし（稽古日）
@@ -2816,14 +2780,14 @@ https://performers-time.netlify.app
               id:"f_lunch", mkey:"lunch", time:addM(wakeup,240),
               label:"お昼", dot:"pm",
               reason:"稽古の合間に。腹8分目を意識してエネルギーを持続させる",
-              db: heartyMode ? HEARTY_DB.lunch : lunchOn ? FOOD_DB.lunchBento : SF.lunchCombini,
-              isBento: !heartyMode && lunchOn,
+              db: lunchOn ? FOOD_DB.lunchBento : SF.lunchCombini,
+              isBento: lunchOn,
             });
             foodItems.push({
               id:"f_recovery", mkey:"recovery", time:addM(wakeup,660),
               label:"稽古後・夜ごはん", dot:"post",
               reason:"稽古終了後60分以内が理想。タンパク質をしっかり摂って睡眠中の修復を最大化",
-              db: heartyMode ? HEARTY_DB.recovery : SF.recovery,
+              db: SF.recovery,
             });
           }
 
@@ -2871,10 +2835,10 @@ https://performers-time.netlify.app
               // 選択中の食事の合計カロリーを計算
               const SF2 = STORE_FOODS[store]||STORE_FOODS.seven;
               const mealKcals = {
-                breakfast: (heartyMode ? HEARTY_DB.breakfast : SF2.breakfast)?.[mealIdx.breakfast||0]?.kcal||0,
-                lunch:     heartyMode ? (HEARTY_DB.lunch?.[mealIdx.lunch||0]?.kcal||0) : lunchOn ? (FOOD_DB.lunchBento?.[mealIdx.lunch||0]?.kcal||0) : (SF2.lunchCombini?.[mealIdx.lunch||0]?.kcal||0),
+                breakfast: SF2.breakfast?.[mealIdx.breakfast||0]?.kcal||0,
+                lunch:     lunchOn ? (FOOD_DB.lunchBento?.[mealIdx.lunch||0]?.kcal||0) : (SF2.lunchCombini?.[mealIdx.lunch||0]?.kcal||0),
                 preboost:  SF2.preboost?.[mealIdx.preboost||0]?.kcal||0,
-                recovery:  (heartyMode ? HEARTY_DB.recovery : SF2.recovery)?.[mealIdx.recovery||0]?.kcal||0,
+                recovery:  SF2.recovery?.[mealIdx.recovery||0]?.kcal||0,
               };
               const totalMealKcal = Object.values(mealKcals).reduce((a,b)=>a+b,0);
               const remaining = Math.max(0, macros.kcal - totalMealKcal);
@@ -2923,51 +2887,23 @@ https://performers-time.netlify.app
               );
             })()}
 
-            {/* ランチスタイル2択 */}
-            <div style={{padding:"0 16px 10px"}}>
-              <div style={{fontSize:10,letterSpacing:".1em",color:"var(--dim)",marginBottom:8}}>🍱 ランチ</div>
-              <div style={{display:"flex",gap:6}}>
-                {([
-                  {key:true,  label:"🍱 お弁当", sub:"劇場から支給", color:"#6abf80", bg:"rgba(74,144,96,.12)", border:"rgba(74,144,96,.35)"},
-                  {key:false, label:"🏪 コンビニ", sub:"自分で購入",  color:"var(--gold-l)", bg:"rgba(180,140,40,.12)", border:"rgba(180,140,40,.35)"},
-                ] as {key:boolean,label:string,sub:string,color:string,bg:string,border:string}[]).map(opt=>(
-                  <button key={String(opt.key)} onClick={()=>setLunchOn(opt.key)}
-                    style={{
-                      flex:1,padding:"10px 4px",borderRadius:12,cursor:"pointer",
-                      fontSize:10,fontWeight:700,lineHeight:1.6,
-                      fontFamily:"'Noto Sans JP',sans-serif",transition:"all .2s",
-                      border:`2px solid ${lunchOn===opt.key?opt.border:"rgba(255,255,255,.06)"}`,
-                      background:lunchOn===opt.key?opt.bg:"var(--bg3)",
-                      color:lunchOn===opt.key?opt.color:"var(--dim)",
-                      boxShadow:lunchOn===opt.key?`0 0 10px ${opt.bg}`:"none",
-                    }}>
-                    <div>{opt.label}</div>
-                    <div style={{fontSize:9,fontWeight:400,opacity:.7,marginTop:1}}>{opt.sub}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* がっつりボタン（全体） */}
-            <div style={{padding:"0 16px 14px"}}>
-              <div style={{fontSize:10,letterSpacing:".1em",color:"var(--dim)",marginBottom:8}}>🍖 全体のボリューム</div>
-              <button onClick={()=>setHeartyMode(p=>!p)}
-                style={{
-                  width:"100%",padding:"11px 16px",borderRadius:12,cursor:"pointer",
-                  display:"flex",alignItems:"center",justifyContent:"space-between",
-                  fontSize:12,fontWeight:700,
-                  fontFamily:"'Noto Sans JP',sans-serif",transition:"all .2s",
-                  border:`2px solid ${heartyMode?"rgba(192,74,58,.5)":"rgba(255,255,255,.06)"}`,
-                  background:heartyMode?"rgba(192,74,58,.15)":"var(--bg3)",
-                  color:heartyMode?"var(--red-l)":"var(--dim)",
-                  boxShadow:heartyMode?"0 0 10px rgba(192,74,58,.2)":"none",
-                }}>
-                <div>
-                  <span style={{marginRight:8}}>🍖 がっつり食べたい日</span>
-                  <span style={{fontSize:10,opacity:.7}}>朝食・ランチ・回復食すべてに適用</span>
+            {/* お昼トグル */}
+            {(()=>{
+              const activeCount = shows.filter(s=>s.enabled&&s.time).length;
+              return(
+              <div className={`lunch-toggle-row ${lunchOn?"on":""}`} style={{marginBottom:12}}>
+                <div className="lunch-info">
+                  <div className="lunch-info-title">{lunchOn?"🍱 お弁当が出る日":"🏪 コンビニで買う日"}</div>
+                  <div className="lunch-info-sub">
+                    {activeCount>=2
+                      ? "マチソワはお弁当が出ることが多いです"
+                      : "タップで切り替え"}
+                  </div>
                 </div>
-                <div className={`row-toggle ${heartyMode?"on":""}`} style={{flexShrink:0}}/>
-              </button>
-            </div>
+                <div className={`row-toggle ${lunchOn?"on":""}`} onClick={()=>setLunchOn(p=>!p)}/>
+              </div>
+              );
+            })()}
 
             {/* 食事タイムライン */}
             {/* コンビニ選択 */}
@@ -3022,6 +2958,13 @@ https://performers-time.netlify.app
                       <div className={`tl-lbl ${item.dot==="show"?"show":item.dot==="pre"?"preboost":item.dot==="post"?"showend":item.dot==="am"?"morning":"evening"}`}>
                         {item.label}
                       </div>
+                      {/* お昼はここにもトグル */}
+                      {item.id==="f_lunch"&&(
+                        <div style={{fontSize:9,padding:"2px 7px",borderRadius:20,background:lunchOn?"rgba(74,144,96,.15)":"rgba(255,255,255,.06)",border:lunchOn?"1px solid rgba(74,144,96,.3)":"1px solid rgba(255,255,255,.1)",color:lunchOn?"#6abf80":"var(--dim)",cursor:"pointer"}}
+                          onClick={e=>{e.stopPropagation();setLunchOn(p=>!p);}}>
+                          {lunchOn?"🍱 弁当":"🏪 コンビニ"}
+                        </div>
+                      )}
                     </div>
                     {food&&(
                       <>
